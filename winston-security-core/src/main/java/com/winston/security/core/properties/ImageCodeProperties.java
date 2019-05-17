@@ -21,4 +21,6 @@ public class ImageCodeProperties {
     // 过期时间
     private int expireIn = 60;
 
+    private String url;
+
 }

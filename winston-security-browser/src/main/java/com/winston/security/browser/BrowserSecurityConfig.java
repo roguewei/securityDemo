@@ -3,18 +3,13 @@ package com.winston.security.browser;
 import com.winston.security.browser.authentication.ImoocAuthenticationFailHandler;
 import com.winston.security.browser.authentication.ImoocAuthenticationSuccessHandler;
 import com.winston.security.core.properties.SecurityProperties;
-import com.winston.vaildate.code.ValidateCodeFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * @ClassName BrowserSecurityConfig
@@ -37,6 +32,14 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private ImoocAuthenticationFailHandler imoocAuthenticationFailHandler;
 
+    /**
+     * @Author Winston
+     * @Description 添加了这个bean之后，userdetailsservice里校验前端输入的密码时就会自动把前端传过来的密码进行加密，
+     * 然后再去跟数据库中的密码去比对
+     * @Date 2019/5/12:22:03
+     * @Param
+     * @Retuen
+    **/
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
@@ -45,18 +48,23 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-        ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
-        // 验证码错误等于认证失败，需要到认证失败的处理器类中执行
-        validateCodeFilter.setAuthenticationFailureHandler(imoocAuthenticationFailHandler);
+//        ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
+//        // 验证码错误等于认证失败，需要到认证失败的处理器类中执行
+//        validateCodeFilter.setAuthenticationFailureHandler(imoocAuthenticationFailHandler);
+//
+//        validateCodeFilter.setSecurityProperties(securityProperties);
+//        validateCodeFilter.afterPropertiesSet();
 
         http
                 // 将自己的过滤器添加到security的UsernamePasswordAuthenticationFilter过滤器前面执行
-                .addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)
                 // 基本登录框
 //                .httpBasic()
                 // 用表单登录
                 .formLogin()
-                // 登录页面
+                // 登录页面——浏览器网页的登录页面
+//                .loginPage("/signIn.html")
+                // 登录页面——前后端分离的登录提示
                 .loginPage("/authentication/require")
                 // 告诉security登录请求该URL
                 .loginProcessingUrl("/authentication/form")

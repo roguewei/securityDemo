@@ -29,10 +29,16 @@ security:
 # 自定义登录页
 winston:
   security:
+    # 浏览器HTML请求的配置
     browser:
+      # 配置登录页
 #      loginPage: /demo-signIn.html
-      loginType: JSON
+      # 配置请求类型,一半前后端分离配置JSON,网页配置REDIRECT
+      loginType: REDIRECT
+    # 图片验证码配置
     code:
       image:
         length: 6
         width: 100
+        # 需要做图形验证码校验的URL
+        url: /user,/user/*

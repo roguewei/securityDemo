@@ -33,10 +33,10 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-//        registry.addInterceptor(timeInterceptor);
+        registry.addInterceptor(timeInterceptor);
     }
 
-//    @Bean
+    @Bean
     public FilterRegistrationBean timeFilter(){
         // 为项目添加没有注入到spring中的过滤器
         FilterRegistrationBean registrationBean = new FilterRegistrationBean();

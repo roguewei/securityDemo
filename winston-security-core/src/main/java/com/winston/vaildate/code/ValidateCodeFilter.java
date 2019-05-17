@@ -1,11 +1,14 @@
 package com.winston.vaildate.code;
 
 import com.winston.exception.ValidateException;
+import com.winston.security.core.properties.SecurityProperties;
 import lombok.Data;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.social.connect.web.HttpSessionSessionStrategy;
 import org.springframework.social.connect.web.SessionStrategy;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -16,6 +19,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @ClassName ValidateCodeFilter
@@ -24,16 +29,44 @@ import java.io.IOException;
  * @Date 2019/4/15 21:56
  * @Version 1.0
  **/
-public class ValidateCodeFilter extends OncePerRequestFilter {
+@Data
+public class ValidateCodeFilter extends OncePerRequestFilter implements InitializingBean {
 
     private AuthenticationFailureHandler authenticationFailureHandler;
 
     private SessionStrategy sessionStrategy = new HttpSessionSessionStrategy();
 
+    private Set<String> urls = new HashSet<>();
+
+    private SecurityProperties securityProperties;
+
+    private AntPathMatcher antPathMatcher = new AntPathMatcher();
+
+    // spring配置都组装好后初始化需要校验验证码的URL
+    @Override
+    public void afterPropertiesSet() throws ServletException {
+        super.afterPropertiesSet();
+        // 将配置的URL以逗号分开，组装成数组
+        String[] configUrls = StringUtils.splitByWholeSeparatorPreserveAllTokens(securityProperties.getCode().getImage().getUrl(), ",");
+        for(String configUrl : configUrls){
+            urls.add(configUrl);
+        }
+        urls.add("/authentication/form");
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if(StringUtils.equals("/authentication/form", request.getRequestURI())
-            && StringUtils.equalsIgnoreCase(request.getMethod(), "post")){
+
+        boolean action = false;
+
+        for(String url : urls){
+            // 如果请求的URI和配置的URL能匹配上就需要做过滤
+            if(antPathMatcher.match(url, request.getRequestURI())){
+                action = true;
+            }
+        }
+
+        if(action){
 
             try {
                 validate(new ServletWebRequest(request));
@@ -71,19 +104,4 @@ public class ValidateCodeFilter extends OncePerRequestFilter {
 
     }
 
-    public void setAuthenticationFailureHandler(AuthenticationFailureHandler authenticationFailureHandler) {
-        this.authenticationFailureHandler = authenticationFailureHandler;
-    }
-
-    public AuthenticationFailureHandler getAuthenticationFailureHandler() {
-        return authenticationFailureHandler;
-    }
-
-    public void setSessionStrategy(SessionStrategy sessionStrategy) {
-        this.sessionStrategy = sessionStrategy;
-    }
-
-    public SessionStrategy getSessionStrategy() {
-        return sessionStrategy;
-    }
 }

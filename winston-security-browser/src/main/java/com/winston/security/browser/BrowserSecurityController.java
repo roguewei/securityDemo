@@ -59,6 +59,7 @@ public class BrowserSecurityController {
      @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
     public Result requireAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {
          // 获取引发跳转的请求
+
          SavedRequest savedRequest = requestCache.getRequest(request, response);
          if(savedRequest != null){
              // 获取URL

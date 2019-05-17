@@ -41,6 +41,7 @@ public class MyUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         System.out.println("登录用户名： "+ username);
+        System.out.println(passwordEncoder.encode("123123"));
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         return new org.springframework.security.core.userdetails.User(username,
